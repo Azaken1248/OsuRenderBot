@@ -2,6 +2,8 @@
 
 A Discord bot for submitting osu! replay files to a cloud-based GPU rendering service. Users can upload `.osr` replay files, select custom skins, and receive high-quality rendered videos directly through Discord.
 
+[Invite RenderBot to your server](https://discord.com/oauth2/authorize?client_id=1461432321722028206&permissions=116736&integration_type=0&scope=applications.commands+bot)
+
 ## Features
 
 - **Replay Rendering**: Submit osu! replay files for cloud-based video rendering
