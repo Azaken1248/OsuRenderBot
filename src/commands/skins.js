@@ -6,7 +6,6 @@ export const data = new SlashCommandBuilder()
     .setDescription('List all available osu! skins on the server');
 
 export async function execute(interaction) {
-    // 1. Tell Discord to wait (Fixes the 10062 Error)
     await interaction.deferReply(); 
 
     try {
@@ -16,8 +15,7 @@ export async function execute(interaction) {
             .setTitle('🎨 Cloud Skins')
             .setColor('#fba295')
             .setDescription(skins.map(s => `• ${s}`).join('\n') || 'No skins found.');
-        
-        // 2. Use editReply because we already deferred
+
         await interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.error(err);

@@ -24,7 +24,6 @@ client.on('interactionCreate', async (interaction) => {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
 
-    // Handle Autocomplete (for /render skin selection)
     if (interaction.isAutocomplete() && command.autocomplete) {
         await command.autocomplete(interaction);
     }

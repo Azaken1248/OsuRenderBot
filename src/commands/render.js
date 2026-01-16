@@ -34,12 +34,10 @@ export const data = new SlashCommandBuilder()
 export async function autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused().toLowerCase();
     
-    // Refresh cache in the background if it's old (don't 'await' it here!)
     if (Date.now() - lastFetch > CACHE_TTL) {
         updateSkinCache();
     }
 
-    // Use the cached list immediately (Instant response)
     const filtered = skinCache
         .filter(choice => choice.toLowerCase().includes(focusedValue))
         .slice(0, 25);
