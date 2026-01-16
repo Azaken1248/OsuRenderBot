@@ -14,7 +14,7 @@ export async function execute(interaction) {
         
         const embed = new EmbedBuilder()
             .setTitle('🎨 Cloud Skins')
-            .setColor('#ff66aa')
+            .setColor('#fba295')
             .setDescription(skins.map(s => `• ${s}`).join('\n') || 'No skins found.');
         
         // 2. Use editReply because we already deferred

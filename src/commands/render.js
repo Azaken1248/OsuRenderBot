@@ -72,7 +72,7 @@ export async function execute(interaction) {
         const embed = new EmbedBuilder()
             .setTitle('🎬 Render Job Started')
             .setURL(`https://api.render.azaken.com/view/${result.job_id}`)
-            .setColor('#ff66aa')
+            .setColor('#fba295')
             .addFields(
                 { name: 'Job ID', value: `\`${result.job_id}\``, inline: true },
                 { name: 'Skin', value: `\`${skin}\``, inline: true },
