@@ -12,13 +12,13 @@ export async function execute(interaction) {
         const skins = await renderAPI.getSkins();
         
         const embed = new EmbedBuilder()
-            .setTitle('🎨 Cloud Skins')
+            .setTitle('◆ Cloud Skins')
             .setColor('#fba295')
             .setDescription(skins.map(s => `• ${s}`).join('\n') || 'No skins found.');
 
         await interaction.editReply({ embeds: [embed] });
     } catch (err) {
         console.error(err);
-        await interaction.editReply('❌ Failed to fetch skins from the API.');
+        await interaction.editReply('✕ Failed to fetch skins from the API.');
     }
 }

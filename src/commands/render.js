@@ -4,7 +4,8 @@ import { renderAPI } from '../utils/api.js';
 
 let skinCache = [];
 let lastFetch = 0;
-const CACHE_TTL = 60000; 
+const CACHE_TTL = 60000;
+const jobMetadata = new Map(); // Store job metadata
 
 async function updateSkinCache() {
     try {
@@ -58,7 +59,7 @@ export async function execute(interaction) {
     const quality = interaction.options.getString('quality') || 'standard';
 
     if (!replayAttachment.name.endsWith('.osr')) {
-        return interaction.editReply('❌ Error: The file must be a `.osr` replay file.');
+        return interaction.editReply('✕ Error: The file must be a `.osr` replay file.');
     }
 
     try {
@@ -67,8 +68,16 @@ export async function execute(interaction) {
             skin, quality, motionBlur: true
         });
 
+        jobMetadata.set(result.job_id, {
+            skin,
+            quality,
+            fileName: replayAttachment.name,
+            userId: interaction.user.id,
+            submittedAt: new Date()
+        });
+
         const embed = new EmbedBuilder()
-            .setTitle('🎬 Render Job Started')
+            .setTitle('▶ Render Job Started')
             .setURL(`https://api.render.azaken.com/view/${result.job_id}`)
             .setColor('#fba295')
             .addFields(
@@ -83,7 +92,7 @@ export async function execute(interaction) {
         pollJobStatus(result.job_id, interaction);
     } catch (err) {
         console.error(err);
-        await interaction.editReply(`❌ **Render Failed:** ${err.response?.data?.detail || "API unreachable"}`);
+        await interaction.editReply(`✕ **Render Failed:** ${err.response?.data?.detail || "API unreachable"}`);
     }
 }
 
@@ -93,12 +102,48 @@ async function pollJobStatus(jobId, interaction) {
             const data = await renderAPI.getStatus(jobId);
             if (data.status === 'complete') {
                 clearInterval(interval);
+                
+                const videoUrl = `https://api.render.azaken.com/video/${jobId}`;
+                const metadata = jobMetadata.get(jobId) || {};
+                
+                // Create a rich embed with video information
+                const completionEmbed = new EmbedBuilder()
+                    .setTitle('✓ Render Complete')
+                    .setURL(videoUrl)
+                    .setColor('#00b388')
+                    .setDescription(`[▶ Watch Replay](${videoUrl})`)
+                    .addFields(
+                        { name: '📁 File', value: metadata.fileName || 'Unknown', inline: true },
+                        { name: '⚙ Skin', value: metadata.skin || 'Default', inline: true },
+                        { name: '📺 Quality', value: metadata.quality || 'standard', inline: true }
+                    )
+                    .setImage(videoUrl)
+                    .setFooter({ text: `Job ID: ${jobId}` })
+                    .setTimestamp();
+
                 await interaction.followUp({
-                    content: `✅ **Render Finished!** <@${interaction.user.id}>\n🔗 **View:** https://api.render.azaken.com/video/${jobId}`
+                    content: `✓ **Render Finished!** <@${interaction.user.id}>`,
+                    embeds: [completionEmbed]
                 });
+
+                // Clean up old metadata
+                jobMetadata.delete(jobId);
             } else if (data.status === 'error') {
                 clearInterval(interval);
-                await interaction.followUp(`❌ **Job ${jobId} failed.**`);
+                
+                const errorEmbed = new EmbedBuilder()
+                    .setTitle('✕ Render Failed')
+                    .setColor('#ff6b6b')
+                    .setDescription(data.error || 'An unknown error occurred.')
+                    .setFooter({ text: `Job ID: ${jobId}` })
+                    .setTimestamp();
+
+                await interaction.followUp({
+                    embeds: [errorEmbed]
+                });
+
+                // Clean up metadata
+                jobMetadata.delete(jobId);
             }
         } catch (e) {}
     }, 10000); 

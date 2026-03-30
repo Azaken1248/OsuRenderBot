@@ -13,16 +13,16 @@ export async function execute(interaction) {
     const attachment = interaction.options.getAttachment('skin_file');
 
     if (!attachment.name.endsWith('.osk')) {
-        return interaction.editReply('❌ Please upload a valid `.osk` file.');
+        return interaction.editReply('✕ Please upload a valid `.osk` file.');
     }
 
     try {
         const response = await axios.get(attachment.url, { responseType: 'arraybuffer' });
         const result = await renderAPI.uploadSkin(response.data, attachment.name);
         
-        await interaction.editReply(`✅ **Success!** Skin \`${result.skin_name}\` is now available for rendering.`);
+        await interaction.editReply(`✓ **Success!** Skin \`${result.skin_name}\` is now available for rendering.`);
     } catch (err) {
         const errorMsg = err.response?.data?.detail || err.message;
-        await interaction.editReply(`❌ Upload failed: ${errorMsg}`);
+        await interaction.editReply(`✕ Upload failed: ${errorMsg}`);
     }
 }
