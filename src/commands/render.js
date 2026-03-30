@@ -117,7 +117,7 @@ async function pollJobStatus(jobId, interaction) {
                         { name: '⚙ Skin', value: metadata.skin || 'Default', inline: true },
                         { name: '📺 Quality', value: metadata.quality || 'standard', inline: true }
                     )
-                    .setImage(videoUrl)
+                    .setVideo(videoUrl)
                     .setFooter({ text: `Job ID: ${jobId}` })
                     .setTimestamp();
 
