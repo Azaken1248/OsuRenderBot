@@ -1,7 +1,6 @@
 import axios from 'axios';
 import FormData from 'form-data';
 
-
 const API_BASE_URL = "https://api.render.azaken.com"
 
 export const renderAPI = {
@@ -28,9 +27,26 @@ export const renderAPI = {
     async submitRender(fileBuffer, fileName, options) {
         const form = new FormData();
         form.append('replay', fileBuffer, fileName);
+        
         form.append('skin', options.skin || 'default');
         form.append('quality', options.quality || 'standard');
+        
+        if (options.bg_dim !== null && options.bg_dim !== undefined) {
+            form.append('bg_dim', String(options.bg_dim));
+        }
+        
         form.append('motion_blur', String(options.motion_blur ?? true));
+        
+        const optionalBools = [
+            'storyboard', 'video', 'snaking_in', 
+            'snaking_out', 'hit_error_meter', 'key_overlay'
+        ];
+        
+        for (const key of optionalBools) {
+            if (options[key] !== null && options[key] !== undefined) {
+                form.append(key, String(options[key]));
+            }
+        }
         
         const { data } = await axios.post(`${API_BASE_URL}/render`, form, {
             headers: form.getHeaders()

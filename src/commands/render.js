@@ -5,7 +5,7 @@ import { renderAPI } from '../utils/api.js';
 let skinCache = [];
 let lastFetch = 0;
 const CACHE_TTL = 60000;
-const jobMetadata = new Map(); // Store job metadata
+const jobMetadata = new Map(); 
 
 async function updateSkinCache() {
     try {
@@ -30,7 +30,23 @@ export const data = new SlashCommandBuilder()
         option.setName('quality').setDescription('Output resolution').addChoices(
             { name: 'Standard (1080p)', value: 'standard' },
             { name: 'Ultra (4K)', value: 'ultra' }
-        ));
+        ))
+    .addNumberOption(option => 
+        option.setName('bg_dim').setDescription('Background dim (e.g., 0-100)'))
+    .addBooleanOption(option => 
+        option.setName('motion_blur').setDescription('Enable motion blur'))
+    .addBooleanOption(option => 
+        option.setName('storyboard').setDescription('Enable storyboard'))
+    .addBooleanOption(option => 
+        option.setName('video').setDescription('Enable background video'))
+    .addBooleanOption(option => 
+        option.setName('snaking_in').setDescription('Enable snaking in sliders'))
+    .addBooleanOption(option => 
+        option.setName('snaking_out').setDescription('Enable snaking out sliders'))
+    .addBooleanOption(option => 
+        option.setName('hit_error_meter').setDescription('Show hit error meter'))
+    .addBooleanOption(option => 
+        option.setName('key_overlay').setDescription('Show key overlay'));
 
 export async function autocomplete(interaction) {
     const focusedValue = interaction.options.getFocused().toLowerCase();
@@ -55,8 +71,17 @@ export async function autocomplete(interaction) {
 export async function execute(interaction) {
     await interaction.deferReply();
     const replayAttachment = interaction.options.getAttachment('replay');
+    
     const skin = interaction.options.getString('skin') || 'Default';
     const quality = interaction.options.getString('quality') || 'standard';
+    const bg_dim = interaction.options.getNumber('bg_dim');
+    const motion_blur = interaction.options.getBoolean('motion_blur');
+    const storyboard = interaction.options.getBoolean('storyboard');
+    const video = interaction.options.getBoolean('video');
+    const snaking_in = interaction.options.getBoolean('snaking_in');
+    const snaking_out = interaction.options.getBoolean('snaking_out');
+    const hit_error_meter = interaction.options.getBoolean('hit_error_meter');
+    const key_overlay = interaction.options.getBoolean('key_overlay');
 
     if (!replayAttachment.name.endsWith('.osr')) {
         return interaction.editReply('✕ Error: The file must be a `.osr` replay file.');
@@ -64,8 +89,10 @@ export async function execute(interaction) {
 
     try {
         const fileResponse = await axios.get(replayAttachment.url, { responseType: 'arraybuffer' });
+        
         const result = await renderAPI.submitRender(fileResponse.data, replayAttachment.name, { 
-            skin, quality, motionBlur: true
+            skin, quality, bg_dim, motion_blur, storyboard, video, 
+            snaking_in, snaking_out, hit_error_meter, key_overlay
         });
 
         jobMetadata.set(result.job_id, {
@@ -106,7 +133,6 @@ async function pollJobStatus(jobId, interaction) {
                 const videoUrl = `https://api.render.azaken.com/video/${jobId}`;
                 const metadata = jobMetadata.get(jobId) || {};
                 
-                // Create a rich embed with video information
                 const completionEmbed = new EmbedBuilder()
                     .setTitle('✓ Render Complete')
                     .setURL(videoUrl)
@@ -126,7 +152,6 @@ async function pollJobStatus(jobId, interaction) {
                     embeds: [completionEmbed]
                 });
 
-                // Clean up old metadata
                 jobMetadata.delete(jobId);
             } else if (data.status === 'error') {
                 clearInterval(interval);
@@ -142,7 +167,6 @@ async function pollJobStatus(jobId, interaction) {
                     embeds: [errorEmbed]
                 });
 
-                // Clean up metadata
                 jobMetadata.delete(jobId);
             }
         } catch (e) {}
