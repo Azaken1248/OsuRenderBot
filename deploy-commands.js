@@ -21,17 +21,23 @@ for (const file of commandFiles) {
     }
 }
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
+const guildId = process.env.GUILD_ID;
 
 (async () => {
     try {
-        console.log(`Started refreshing ${commands.length} application (/) commands.`);
+        const target = guildId ? `guild ${guildId}` : 'global application';
+        const route = guildId
+            ? Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId)
+            : Routes.applicationCommands(process.env.CLIENT_ID);
+
+        console.log(`Started refreshing ${commands.length} application (/) commands for ${target}.`);
 
         const data = await rest.put(
-            Routes.applicationCommands(process.env.CLIENT_ID),
+            route,
             { body: commands },
         );
 
-        console.log(`Successfully reloaded ${data.length} application (/) commands.`);
+        console.log(`Successfully reloaded ${data.length} application (/) commands for ${target}.`);
     } catch (error) {
         console.error(error);
     }

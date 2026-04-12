@@ -8,7 +8,7 @@ A Discord bot for submitting osu! replay files to a cloud-based GPU rendering se
 
 - **Replay Rendering**: Submit osu! replay files for cloud-based video rendering
 - **Custom Skins**: Choose from available community skins with autocomplete support
-- **Quality Options**: Render in Standard (1080p) or Ultra (4K) resolution
+- **Quality Options**: Render in Standard (1080p), Ultra (4K), or Cinematic (1080p high bitrate)
 - **Skin Management**: Upload and manage `.osk` skin files
 - **Job Tracking**: Real-time polling and notifications when renders complete
 - **Smart Caching**: Optimized skin list caching for fast autocomplete responses
@@ -21,7 +21,7 @@ Submit an osu! replay file for rendering.
 **Options:**
 - `replay` (required): The `.osr` replay file to render
 - `skin` (optional): Choose from available skins (autocomplete enabled)
-- `quality` (optional): Output resolution - Standard (1080p) or Ultra (4K)
+- `quality` (optional): Output preset - Standard (1080p), Ultra (4K), or Cinematic (1080p high bitrate)
 
 **Example Usage:**
 ```
@@ -63,12 +63,15 @@ npm install
 ```env
 DISCORD_TOKEN=your_discord_bot_token
 CLIENT_ID=your_discord_application_client_id
+GUILD_ID=your_test_server_id # optional, enables instant guild command updates
 ```
 
 4. Deploy slash commands to Discord:
 ```bash
 node deploy-commands.js
 ```
+
+If `GUILD_ID` is set, commands are deployed to that guild instantly. Without it, deployment is global and can take time to appear in Discord clients.
 
 5. Start the bot:
 ```bash
